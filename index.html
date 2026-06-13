@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUNNEN Planner — Balcony Tile Makeover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F7F2E9;
+    --paper-deep: #EFE7D8;
+    --ink: #2B2620;
+    --ink-soft: #6B6256;
+    --line: #D8CDBB;
+    --accent: #C75B39;
+    --accent-deep: #A4452A;
+    --leaf: #4E7A3C;
+    --card: #FFFDF8;
+    --card-strong: #FFFFFF;
+    --banner-bg: #FCEDE6;
+    --banner-ink: #A4452A;
+    --grad1: #F3E9D2;
+    --grad2: #EFE3CC;
+    --shadow-col: rgba(43,38,32,.16);
+    --radius: 10px;
+  }
+  html[data-theme="dark"] {
+    --paper: #211D17;
+    --paper-deep: #2C2720;
+    --ink: #EFE7D8;
+    --ink-soft: #A89C8B;
+    --line: #453F33;
+    --accent: #D97350;
+    --accent-deep: #E08055;
+    --leaf: #7FAE6A;
+    --card: #2A251E;
+    --card-strong: #383228;
+    --banner-bg: #45291E;
+    --banner-ink: #EFA083;
+    --grad1: #2A241B;
+    --grad2: #282218;
+    --shadow-col: rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Karla', 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, var(--grad1) 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, var(--grad2) 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background .25s, color .25s;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: radial-gradient(var(--line) 1px, transparent 1.4px);
+    background-size: 26px 26px;
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 24px 34px 10px;
+    position: relative; z-index: 1;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 900; font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: -0.5px;
+  }
+  h1 .runnen { color: var(--accent); }
+  h1 .dot { color: var(--leaf); }
+  .tagline {
+    font-size: 13.5px; color: var(--ink-soft);
+    border-left: 3px solid var(--accent); padding-left: 12px;
+    max-width: 350px; line-height: 1.35;
+  }
+  .head-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .seg {
+    display: inline-flex; background: var(--paper-deep);
+    border: 1.5px solid var(--ink); border-radius: 99px; overflow: hidden;
+  }
+  .seg button {
+    font-family: 'Karla', sans-serif; font-weight: 700; font-size: 12.5px;
+    padding: 6px 13px; border: none; cursor: pointer;
+    background: transparent; color: var(--ink);
+    transition: background .15s;
+  }
+  .seg button + button { border-left: 1.5px solid var(--ink); }
+  .seg button.on { background: var(--ink); color: var(--paper); }
+  .seg button:hover:not(.on) { background: var(--card-strong); }
+
+  .layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 22px;
+    padding: 14px 34px 30px;
+    position: relative; z-index: 1;
+    align-items: start;
+  }
+  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+
+  aside { display: flex; flex-direction: column; gap: 16px; }
+  .panel {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    box-shadow: 3px 3px 0 var(--shadow-col);
+    padding: 14px 16px 16px;
+  }
+  .panel h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .panel h2::after { content:""; flex:1; height:1px; background: var(--line); }
+  .panel h2 .step {
+    display: inline-grid; place-items: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    font-family: 'Karla', sans-serif; font-size: 12px; font-weight: 700;
+  }
+
+  .toolrow { display: flex; gap: 8px; }
+  .tool {
+    flex: 1; padding: 9px 6px;
+    font-family: 'Karla', sans-serif; font-weight: 700; font-size: 13px;
+    background: var(--paper-deep); color: var(--ink);
+    border: 1.5px solid var(--ink); border-radius: 8px;
+    cursor: pointer; transition: transform .08s, background .15s;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tool svg { width: 20px; height: 20px; }
+  .tool svg * { stroke: var(--ink); }
+  .tool:hover { transform: translateY(-1px); }
+  .tool.active { background: var(--ink); color: var(--paper); }
+  .tool.active svg * { stroke: var(--paper); }
+  .tool.shape-active { background: var(--accent); border-color: var(--accent-deep); color: #fff; }
+  .tool.shape-active svg * { stroke: #fff; }
+
+  .brush-row {
+    margin-top: 10px; display: flex; align-items: center; gap: 9px;
+    font-size: 12.5px; font-weight: 700;
+  }
+  .brush-row .seg { flex: 1; }
+  .brush-row .seg button { flex: 1; }
+
+  .hint { font-size: 12px; color: var(--ink-soft); margin-top: 9px; line-height: 1.45; }
+  .hint b { color: var(--ink); }
+
+  .swatches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .swatch {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 8px;
+    background: var(--paper-deep);
+    border: 1.5px solid transparent; border-radius: 8px;
+    cursor: pointer; font-size: 12.5px; font-weight: 500;
+    transition: transform .08s;
+  }
+  .swatch:hover { transform: translateY(-1px); }
+  .swatch.selected { border-color: var(--ink); background: var(--card-strong); box-shadow: 2px 2px 0 var(--shadow-col); }
+  .swatch .chip {
+    width: 26px; height: 26px; border-radius: 5px; flex: none;
+    border: 1px solid rgba(0,0,0,.25); overflow: hidden;
+  }
+  .pattern-colors {
+    margin-top: 11px; font-size: 12px; color: var(--ink-soft);
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .pattern-colors .mini {
+    width: 15px; height: 15px; border-radius: 4px;
+    border: 1px solid rgba(0,0,0,.3); display: inline-block;
+  }
+
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preset {
+    padding: 8px 6px; font-size: 12.5px; font-weight: 700;
+    font-family: 'Karla', sans-serif;
+    background: var(--paper-deep); color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; justify-content: flex-start;
+    transition: transform .08s;
+  }
+  .preset:hover { transform: translateY(-1px); background: var(--card-strong); }
+  .preset svg { width: 22px; height: 22px; flex: none; border-radius: 3px; }
+
+  .save-row { display: flex; gap: 8px; }
+  .save-row input {
+    flex: 1; min-width: 0;
+    font-family: 'Karla', sans-serif; font-size: 13px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--ink); border-radius: 8px;
+    background: var(--card-strong); color: var(--ink);
+  }
+  .save-row input::placeholder { color: var(--ink-soft); }
+  .save-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn {
+    font-family: 'Karla', sans-serif; font-weight: 700; font-size: 13px;
+    padding: 8px 14px;
+    background: var(--accent); color: #fff;
+    border: 1.5px solid var(--accent-deep); border-radius: 8px;
+    cursor: pointer; transition: transform .08s;
+  }
+  html[data-theme="dark"] .btn:not(.ghost) { color: #211D17; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.ghost { background: var(--paper-deep); color: var(--ink); border-color: var(--ink); }
+
+  .design-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .design-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; padding: 6px 8px;
+    background: var(--paper-deep); border-radius: 7px;
+  }
+  .design-item .name { flex: 1; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .design-item button {
+    font-size: 11.5px; font-weight: 700; font-family: 'Karla', sans-serif;
+    padding: 4px 9px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--ink); background: var(--card-strong); color: var(--ink);
+  }
+  .design-item button.del { border-color: var(--accent-deep); color: var(--accent-deep); }
+  .empty-note { font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 8px; }
+
+  .shoplist { display: flex; flex-direction: column; gap: 7px; font-size: 13px; }
+  .shop-row { display: flex; align-items: center; gap: 9px; }
+  .shop-row .chip { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,.3); flex: none; }
+  .shop-row .nm { flex: 1; }
+  .shop-row .ct { font-weight: 700; }
+  .shop-row .pk { color: var(--ink-soft); font-size: 12px; min-width: 64px; text-align: right; }
+  .shop-total {
+    margin-top: 9px; padding-top: 9px; border-top: 1.5px dashed var(--line);
+    font-size: 12.5px; color: var(--ink-soft); line-height: 1.5;
+  }
+  .shop-total b { color: var(--ink); }
+
+  .stage {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    box-shadow: 4px 4px 0 var(--shadow-col);
+    padding: 18px 20px 14px;
+    position: relative;
+  }
+  .stage-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 6px;
+  }
+  .stage-title { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 17px; }
+  .stage-title small { font-family: 'Karla', sans-serif; font-weight: 400; color: var(--ink-soft); font-size: 12.5px; margin-left: 8px; }
+  .stage-actions { display: flex; gap: 8px; }
+  .shape-banner {
+    display: none;
+    margin: 4px 0 8px;
+    background: var(--banner-bg); border: 1.5px dashed var(--accent);
+    color: var(--banner-ink);
+    font-size: 13px; font-weight: 700;
+    border-radius: 8px; padding: 8px 12px;
+  }
+  body.shape-mode .shape-banner { display: block; }
+  svg#board { width: 100%; height: auto; display: block; touch-action: none; cursor: crosshair; user-select: none; }
+
+  footer {
+    text-align: center; font-size: 12px; color: var(--ink-soft);
+    padding: 0 0 18px; position: relative; z-index: 1;
+  }
+  footer b { color: var(--ink); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--ink); color: var(--paper);
+    font-size: 13px; font-weight: 700;
+    padding: 10px 20px; border-radius: 99px;
+    opacity: 0; transition: all .3s cubic-bezier(.2,.9,.3,1.2);
+    pointer-events: none; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  header, .panel, .stage { animation: rise .5s backwards; }
+  .panel:nth-child(1){animation-delay:.05s} .panel:nth-child(2){animation-delay:.12s}
+  .panel:nth-child(3){animation-delay:.19s} .panel:nth-child(4){animation-delay:.26s}
+  .panel:nth-child(5){animation-delay:.33s} .stage{animation-delay:.1s}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="runnen">RUNNEN</span> Planner<span class="dot">.</span></h1>
+  <p class="tagline" data-i18n-html="tagline"></p>
+  <div class="head-controls">
+    <div class="seg" id="lang-seg">
+      <button data-lang="en">EN</button>
+      <button data-lang="pl">PL</button>
+    </div>
+    <div class="seg" id="theme-seg">
+      <button data-theme-pref="light">☀</button>
+      <button data-theme-pref="auto">Auto</button>
+      <button data-theme-pref="dark">☾</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <section class="panel">
+      <h2><span class="step">1</span> <span data-i18n="tool"></span></h2>
+      <div class="toolrow">
+        <button class="tool active" id="tool-paint">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 14l9-9 5 5-9 9H5a1 1 0 0 1-1-1v-4z" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 5l5 5" stroke-width="1.8"/></svg>
+          <span data-i18n="paint"></span>
+        </button>
+        <button class="tool" id="tool-erase">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 16l8-8 4 4-6 6H9l-2-2z" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 20h16" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span data-i18n="erase"></span>
+        </button>
+        <button class="tool" id="tool-shape">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h10v8h6v8H4V4z" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="3 2.5"/></svg>
+          <span data-i18n="shape"></span>
+        </button>
+      </div>
+      <div class="brush-row">
+        <span data-i18n="brush"></span>
+        <div class="seg" id="precision-seg">
+          <button data-prec="tile" data-i18n="fullTile"></button>
+          <button data-prec="quarter" data-i18n="quarter"></button>
+        </div>
+      </div>
+      <p class="hint" data-i18n-html="toolHint"></p>
+    </section>
+
+    <section class="panel">
+      <h2><span class="step">2</span> <span data-i18n="tileHeader"></span></h2>
+      <div class="swatches" id="swatches"></div>
+      <div class="pattern-colors" id="pattern-colors"></div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="step">3</span> <span data-i18n="patterns"></span></h2>
+      <div class="presets" id="presets"></div>
+      <p class="hint" data-i18n-html="patternsHint"></p>
+    </section>
+
+    <section class="panel">
+      <h2><span class="step">4</span> <span data-i18n="designs"></span></h2>
+      <div class="save-row">
+        <input id="design-name" type="text" maxlength="40">
+        <button class="btn" id="save-btn" data-i18n="save"></button>
+      </div>
+      <div class="design-list" id="design-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="step">5</span> <span data-i18n="shopping"></span></h2>
+      <div class="shoplist" id="shoplist"></div>
+      <div class="shop-total" id="shoptotal"></div>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <div class="stage-head">
+      <div class="stage-title"><span data-i18n="yourBalcony"></span> <small id="dims-label"></small></div>
+      <div class="stage-actions">
+        <button class="btn ghost" id="undo-btn"></button>
+        <button class="btn ghost" id="clear-btn" data-i18n="clear"></button>
+      </div>
+    </div>
+    <div class="shape-banner" data-i18n="shapeBanner"></div>
+    <svg id="board" xmlns="http://www.w3.org/2000/svg"></svg>
+  </main>
+</div>
+
+<footer data-i18n-html="footer"></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ───────────────────────── constants ───────────────────────── */
+const COLS = 17, ROWS = 10, CELL = 30, Q = 15;     // 30 svg units = 30 cm; quarter = 15
+const PACK = 9;                                     // tiles per IKEA pack
+const LS_DESIGNS = "runnen-designs-v1";
+const LS_CURRENT = "runnen-current-v1";
+const LS_LANG = "runnen-lang";
+const LS_THEME = "runnen-theme";
+
+const VARIANTS = [
+  { id: "brown",     base: "#6E4A2F", slat: "#5C3C24", hi: "#7E5A3C", kind: "wood"    },
+  { id: "graybrown", base: "#8C8074", slat: "#776C60", hi: "#9C9184", kind: "wood"    },
+  { id: "darkgray",  base: "#4A4E52", slat: "#3D4144", hi: "#585D61", kind: "plastic" },
+  { id: "lightgray", base: "#B7BABB", slat: "#A3A7A8", hi: "#C6C9CA", kind: "plastic" },
+  { id: "grass",     base: "#4E7A3C", slat: "#3E6530", hi: "#639449", kind: "grass"   },
+];
+const VMAP = Object.fromEntries(VARIANTS.map(v => [v.id, v]));
+
+/* ───────────────────────── i18n ───────────────────────── */
+const I18N = {
+  en: {
+    tagline: `Plan your balcony tile makeover. One square = one 30 × 30 cm IKEA RUNNEN tile — built from <b>four 15 cm sections</b> you can paint individually.`,
+    tool: "Tool", paint: "Paint", erase: "Erase", shape: "Shape",
+    brush: "Brush:", fullTile: "Full tile", quarter: "Quarter ¼",
+    toolHint: `Click or drag to lay tiles. <b>Quarter</b> brush paints the four sections of a RUNNEN tile one by one. <b>Shape</b> edits the balcony floor to match your real L-balcony.`,
+    tileHeader: "RUNNEN tile", patterns: "Patterns",
+    patternsHint: `Patterns use your <b>current</b> + <b>previous</b> tile pick (A / B above) and fill the whole balcony.`,
+    designs: "Designs", save: "Save", load: "Load",
+    namePlaceholder: "e.g. Grass corner v2",
+    noDesigns: "No saved designs yet.",
+    shopping: "Shopping list",
+    noTiles: "No tiles laid yet — start painting!",
+    pack: n => `${n} pack${n > 1 ? "s" : ""}`,
+    shopTotal: (total, area, laid, pct) => `Balcony floor: <b>${total}</b> tiles · <b>${area} m²</b><br>Covered: <b>${laid}</b> / ${total} (${pct} %)`,
+    yourBalcony: "Your balcony",
+    dims: (w, h, n) => `bounding ${w} × ${h} m — ${n} tile floor`,
+    tilesWord: "tiles",
+    undo: "↶ Undo", clear: "Clear tiles",
+    shapeBanner: "✏️ Shape mode — click / drag cells to add or remove balcony floor. Tiles outside the floor are removed.",
+    footer: `Shortcuts: <b>P</b> paint · <b>E</b> erase · <b>S</b> shape · <b>Q</b> quarter brush · <b>Ctrl+Z</b> undo &nbsp;—&nbsp; RUNNEN sold in packs of 9 (0.81 m²)`,
+    patternPair: "Pattern pair:",
+    defaultDesign: "Design",
+    variants: { brown: "Brown stained", graybrown: "Gray-brown", darkgray: "Dark gray", lightgray: "Light gray", grass: "Artificial grass" },
+    presets: { checker: "Checker", "stripes-h": "Stripes —", "stripes-v": "Stripes |", diagonal: "Diagonal", border: "Border", fill: "Fill all" },
+    tPattern: n => `${n} pattern applied`,
+    tSaved: n => `Saved “${n}”`, tLoaded: n => `Loaded “${n}”`, tDeleted: n => `Deleted “${n}”`,
+    tCleared: "All tiles cleared", tNoUndo: "Nothing to undo",
+    themeTitles: { light: "Light", auto: "Follow system", dark: "Dark" },
+  },
+  pl: {
+    tagline: `Zaplanuj metamorfozę balkonu. Jeden kwadrat = jedna płytka IKEA RUNNEN 30 × 30 cm — złożona z <b>czterech sekcji po 15 cm</b>, które można malować osobno.`,
+    tool: "Narzędzie", paint: "Maluj", erase: "Gumka", shape: "Kształt",
+    brush: "Pędzel:", fullTile: "Cała płytka", quarter: "Ćwiartka ¼",
+    toolHint: `Klikaj lub przeciągaj, aby układać płytki. Pędzel <b>Ćwiartka</b> maluje pojedyncze sekcje płytki RUNNEN. <b>Kształt</b> dopasowuje podłogę do Twojego balkonu w kształcie L.`,
+    tileHeader: "Płytka RUNNEN", patterns: "Wzory",
+    patternsHint: `Wzory używają <b>obecnego</b> i <b>poprzedniego</b> koloru (A / B powyżej) i wypełniają cały balkon.`,
+    designs: "Projekty", save: "Zapisz", load: "Wczytaj",
+    namePlaceholder: "np. Trawnik w rogu v2",
+    noDesigns: "Brak zapisanych projektów.",
+    shopping: "Lista zakupów",
+    noTiles: "Jeszcze nic nie ułożono — zacznij malować!",
+    pack: n => `${n} opak.`,
+    shopTotal: (total, area, laid, pct) => `Podłoga balkonu: <b>${total}</b> płytek · <b>${area} m²</b><br>Pokrycie: <b>${laid}</b> / ${total} (${pct} %)`,
+    yourBalcony: "Twój balkon",
+    dims: (w, h, n) => `obrys ${w} × ${h} m — podłoga: ${n} płytek`,
+    tilesWord: "płytek",
+    undo: "↶ Cofnij", clear: "Wyczyść płytki",
+    shapeBanner: "✏️ Tryb kształtu — klikaj / przeciągaj pola, aby dodać lub usunąć podłogę balkonu. Płytki poza podłogą zostaną usunięte.",
+    footer: `Skróty: <b>P</b> maluj · <b>E</b> gumka · <b>S</b> kształt · <b>Q</b> ćwiartka · <b>Ctrl+Z</b> cofnij &nbsp;—&nbsp; RUNNEN sprzedawany w opakowaniach po 9 szt. (0,81 m²)`,
+    patternPair: "Para wzoru:",
+    defaultDesign: "Projekt",
+    variants: { brown: "Brązowa bejca", graybrown: "Szarobrązowy", darkgray: "Ciemnoszary", lightgray: "Jasnoszary", grass: "Sztuczna trawa" },
+    presets: { checker: "Szachownica", "stripes-h": "Pasy —", "stripes-v": "Pasy |", diagonal: "Ukośny", border: "Ramka", fill: "Wypełnij" },
+    tPattern: n => `Zastosowano wzór: ${n}`,
+    tSaved: n => `Zapisano „${n}”`, tLoaded: n => `Wczytano „${n}”`, tDeleted: n => `Usunięto „${n}”`,
+    tCleared: "Wyczyszczono wszystkie płytki", tNoUndo: "Nie ma czego cofnąć",
+    themeTitles: { light: "Jasny", auto: "Jak w systemie", dark: "Ciemny" },
+  },
+};
+let lang = localStorage.getItem(LS_LANG) || ((navigator.language || "").toLowerCase().startsWith("pl") ? "pl" : "en");
+const t = key => I18N[lang][key] ?? I18N.en[key] ?? key;
+
+/* ───────────────────────── theme ───────────────────────── */
+const BOARD_COLORS = {
+  light: { concrete: "#E2DACB", speckle: "#CFC5B2", grid: "#C9BEA9", outline: "#2B2620",
+           ruler: "#6B6256", tick: "#B5AB99", ghost: "#D8CDBB", ghostShape: "#C75B39", ghostFill: "rgba(199,91,57,.07)" },
+  dark:  { concrete: "#39342A", speckle: "#453F31", grid: "#514A39", outline: "#EFE7D8",
+           ruler: "#A89C8B", tick: "#6B6256", ghost: "#4A4337", ghostShape: "#E08055", ghostFill: "rgba(224,128,85,.10)" },
+};
+let themePref = localStorage.getItem(LS_THEME) || "auto";
+const darkMedia = window.matchMedia("(prefers-color-scheme: dark)");
+function resolvedTheme() { return themePref === "auto" ? (darkMedia.matches ? "dark" : "light") : themePref; }
+function boardCol() { return BOARD_COLORS[resolvedTheme()]; }
+function applyTheme() {
+  document.documentElement.dataset.theme = resolvedTheme();
+  document.querySelectorAll("#theme-seg button").forEach(b => {
+    b.classList.toggle("on", b.dataset.themePref === themePref);
+    b.title = t("themeTitles")[b.dataset.themePref];
+  });
+  render();
+}
+darkMedia.addEventListener("change", () => { if (themePref === "auto") applyTheme(); });
+document.querySelectorAll("#theme-seg button").forEach(b => b.onclick = () => {
+  themePref = b.dataset.themePref;
+  localStorage.setItem(LS_THEME, themePref);
+  applyTheme();
+});
+
+/* ───────────────────────── state ───────────────────────── */
+const k = (r, c) => r + "," + c;
+
+function defaultFootprint() {
+  // L-shape: 5 m strip (17 × 5 tiles, 1.5 m deep) + 1.5 m × 3 m wing (5 × 10 tiles)
+  const fp = new Set();
+  for (let r = 0; r < 5; r++) for (let c = 0; c < COLS; c++) fp.add(k(r, c));
+  for (let r = 5; r < ROWS; r++) for (let c = 0; c < 5; c++) fp.add(k(r, c));
+  return fp;
+}
+
+let footprint = defaultFootprint();
+let tiles = new Map();            // "r,c" -> variant id (whole tile) | [TL,TR,BL,BR] quarter ids (null = empty)
+let mode = "paint";               // paint | erase | shape
+let precision = "tile";           // tile | quarter
+let selected = "brown";
+let prevSelected = "graybrown";
+let undoStack = [];
+let dragging = false;
+let shapeAdd = true;
+
+// normalize a tiles entry to a 4-slot quarter array [TL, TR, BL, BR]
+const quads = entry => Array.isArray(entry) ? entry : [entry, entry, entry, entry];
+
+/* ───────────────────────── persistence ───────────────────────── */
+function serialize() { return { footprint: [...footprint], tiles: [...tiles.entries()] }; }
+function deserialize(d) { footprint = new Set(d.footprint); tiles = new Map(d.tiles); }
+function autosave() { try { localStorage.setItem(LS_CURRENT, JSON.stringify(serialize())); } catch (e) {} }
+function loadAutosave() {
+  try {
+    const raw = localStorage.getItem(LS_CURRENT);
+    if (raw) { deserialize(JSON.parse(raw)); return true; }
+  } catch (e) {}
+  return false;
+}
+function getDesigns() { try { return JSON.parse(localStorage.getItem(LS_DESIGNS)) || {}; } catch (e) { return {}; } }
+function setDesigns(d) { try { localStorage.setItem(LS_DESIGNS, JSON.stringify(d)); } catch (e) {} }
+
+/* ───────────────────────── undo ───────────────────────── */
+function pushUndo() {
+  undoStack.push(JSON.stringify(serialize()));
+  if (undoStack.length > 60) undoStack.shift();
+}
+function undo() {
+  const prev = undoStack.pop();
+  if (!prev) { toast(t("tNoUndo")); return; }
+  deserialize(JSON.parse(prev));
+  refresh();
+}
+
+/* ───────────────────────── tile rendering ───────────────────────── */
+function jitter(r, c, n) {
+  let h = (r * 73856093) ^ (c * 19349663) ^ (n * 83492791);
+  h = (h ^ (h >> 13)) * 1274126177;
+  return ((h ^ (h >> 16)) >>> 0) / 4294967295;
+}
+
+// one 15×15 quarter; qi: 0=TL 1=TR 2=BL 3=BR; parquet: TL+BR horizontal slats, TR+BL vertical
+function quadSVG(r, c, qi, vid) {
+  const v = VMAP[vid];
+  const x = c * CELL + (qi % 2) * Q, y = r * CELL + (qi >> 1) * Q;
+  const horiz = qi === 0 || qi === 3;
+  const jbase = qi * 101;
+  let s = `<rect x="${x}" y="${y}" width="${Q}" height="${Q}" fill="${v.base}"/>`;
+
+  if (v.kind === "grass") {
+    for (let i = 0; i < 9; i++) {
+      const gx = x + 1.5 + jitter(r, c, jbase + i) * (Q - 3);
+      const gy = y + 2 + jitter(r, c, jbase + i + 30) * (Q - 5);
+      const len = 2 + jitter(r, c, jbase + i + 60) * 2.2;
+      const lean = (jitter(r, c, jbase + i + 90) - 0.5) * 2.6;
+      const col = jitter(r, c, jbase + i + 120) > 0.5 ? v.hi : v.slat;
+      s += `<path d="M${gx.toFixed(1)} ${(gy + len).toFixed(1)} q${lean.toFixed(1)} ${(-len).toFixed(1)} ${(lean * 1.4).toFixed(1)} ${(-len - 1).toFixed(1)}" stroke="${col}" stroke-width="0.85" fill="none" stroke-linecap="round"/>`;
+    }
+  } else {
+    const slats = 2, sw = Q / slats;
+    for (let i = 0; i < slats; i++) {
+      const off = i * sw;
+      const shade = jitter(r, c, jbase + i) * 0.16 - 0.08;
+      const tone = shade > 0 ? v.hi : v.base;
+      if (horiz) {
+        s += `<rect x="${x}" y="${y + off + 0.7}" width="${Q}" height="${sw - 1.4}" fill="${tone}" opacity="${0.55 + Math.abs(shade) * 3}"/>`;
+        s += `<line x1="${x}" y1="${y + off}" x2="${x + Q}" y2="${y + off}" stroke="${v.slat}" stroke-width="1.1"/>`;
+        if (v.kind === "wood") {
+          const gy2 = y + off + 1.2 + jitter(r, c, jbase + i + 30) * (sw - 2.4);
+          s += `<line x1="${x + 1 + jitter(r, c, jbase + i + 60) * 4}" y1="${gy2}" x2="${x + Q - 1 - jitter(r, c, jbase + i + 90) * 4}" y2="${gy2}" stroke="${v.slat}" stroke-width="0.45" opacity="0.6"/>`;
+        }
+      } else {
+        s += `<rect x="${x + off + 0.7}" y="${y}" width="${sw - 1.4}" height="${Q}" fill="${tone}" opacity="${0.55 + Math.abs(shade) * 3}"/>`;
+        s += `<line x1="${x + off}" y1="${y}" x2="${x + off}" y2="${y + Q}" stroke="${v.slat}" stroke-width="1.1"/>`;
+        if (v.kind === "wood") {
+          const gx2 = x + off + 1.2 + jitter(r, c, jbase + i + 30) * (sw - 2.4);
+          s += `<line x1="${gx2}" y1="${y + 1 + jitter(r, c, jbase + i + 60) * 4}" x2="${gx2}" y2="${y + Q - 1 - jitter(r, c, jbase + i + 90) * 4}" stroke="${v.slat}" stroke-width="0.45" opacity="0.6"/>`;
+        }
+      }
+    }
+  }
+  s += `<rect x="${x + 0.3}" y="${y + 0.3}" width="${Q - 0.6}" height="${Q - 0.6}" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="0.6"/>`;
+  return s;
+}
+
+function tileSVG(r, c, entry) {
+  const arr = quads(entry);
+  const x = c * CELL, y = r * CELL;
+  let s = `<g>`;
+  for (let qi = 0; qi < 4; qi++) if (arr[qi]) s += quadSVG(r, c, qi, arr[qi]);
+  s += `<rect x="${x + 0.5}" y="${y + 0.5}" width="${CELL - 1}" height="${CELL - 1}" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1"/>`;
+  s += `</g>`;
+  return s;
+}
+
+/* ───────────────────────── board rendering ───────────────────────── */
+const board = document.getElementById("board");
+const W = COLS * CELL, H = ROWS * CELL, M = 46;
+board.setAttribute("viewBox", `${-M} ${-M} ${W + M + 16} ${H + M + 16}`);
+
+function boundaryLines() {
+  let s = "";
+  for (const cell of footprint) {
+    const [r, c] = cell.split(",").map(Number);
+    const x = c * CELL, y = r * CELL;
+    if (!footprint.has(k(r - 1, c))) s += `<line x1="${x}" y1="${y}" x2="${x + CELL}" y2="${y}"/>`;
+    if (!footprint.has(k(r + 1, c))) s += `<line x1="${x}" y1="${y + CELL}" x2="${x + CELL}" y2="${y + CELL}"/>`;
+    if (!footprint.has(k(r, c - 1))) s += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + CELL}"/>`;
+    if (!footprint.has(k(r, c + 1))) s += `<line x1="${x + CELL}" y1="${y}" x2="${x + CELL}" y2="${y + CELL}"/>`;
+  }
+  return s;
+}
+
+function rulers() {
+  const B = boardCol();
+  const wM = (COLS * 0.3).toFixed(1), hM = (ROWS * 0.3).toFixed(1);
+  let s = `<g font-family="Karla, sans-serif" font-size="11" fill="${B.ruler}">`;
+  s += `<line x1="0" y1="${-M + 22}" x2="${W}" y2="${-M + 22}" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<line x1="0" y1="${-M + 17}" x2="0" y2="${-M + 27}" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<line x1="${W}" y1="${-M + 17}" x2="${W}" y2="${-M + 27}" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<text x="${W / 2}" y="${-M + 14}" text-anchor="middle" font-weight="700">${wM} m · ${COLS} ${t("tilesWord")}</text>`;
+  s += `<line x1="${-M + 22}" y1="0" x2="${-M + 22}" y2="${H}" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<line x1="${-M + 17}" y1="0" x2="${-M + 27}" y2="0" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<line x1="${-M + 17}" y1="${H}" x2="${-M + 27}" y2="${H}" stroke="${B.ruler}" stroke-width="1"/>`;
+  s += `<text x="${-M + 12}" y="${H / 2}" text-anchor="middle" font-weight="700" transform="rotate(-90 ${-M + 12} ${H / 2})">${hM} m · ${ROWS} ${t("tilesWord")}</text>`;
+  for (let c2 = 1; c2 < COLS; c2++) s += `<line x1="${c2 * CELL}" y1="${-M + 20}" x2="${c2 * CELL}" y2="${-M + 24}" stroke="${B.tick}" stroke-width="0.7"/>`;
+  for (let r2 = 1; r2 < ROWS; r2++) s += `<line x1="${-M + 20}" y1="${r2 * CELL}" x2="${-M + 24}" y2="${r2 * CELL}" stroke="${B.tick}" stroke-width="0.7"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function render() {
+  const B = boardCol();
+  const shape = mode === "shape";
+  let s = "";
+
+  s += `<g>`;
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    if (!footprint.has(k(r, c))) {
+      s += `<rect x="${c * CELL + 1.5}" y="${r * CELL + 1.5}" width="${CELL - 3}" height="${CELL - 3}" rx="2.5"
+              fill="${shape ? B.ghostFill : "none"}"
+              stroke="${shape ? B.ghostShape : B.ghost}" stroke-width="${shape ? 1 : 0.8}"
+              stroke-dasharray="3 3" opacity="${shape ? 0.9 : 0.55}"/>`;
+    }
+  }
+  s += `</g>`;
+
+  s += `<g>`;
+  for (const cell of footprint) {
+    const [r, c] = cell.split(",").map(Number);
+    s += `<rect x="${c * CELL}" y="${r * CELL}" width="${CELL}" height="${CELL}" fill="${B.concrete}"/>`;
+    s += `<circle cx="${c * CELL + 8 + jitter(r, c, 1) * 14}" cy="${r * CELL + 8 + jitter(r, c, 2) * 14}" r="0.9" fill="${B.speckle}"/>`;
+    s += `<circle cx="${c * CELL + 6 + jitter(r, c, 3) * 18}" cy="${r * CELL + 6 + jitter(r, c, 4) * 18}" r="0.7" fill="${B.speckle}"/>`;
+  }
+  s += `</g>`;
+
+  s += `<g stroke="${B.grid}" stroke-width="0.6">`;
+  for (const cell of footprint) {
+    const [r, c] = cell.split(",").map(Number);
+    s += `<rect x="${c * CELL}" y="${r * CELL}" width="${CELL}" height="${CELL}" fill="none"/>`;
+  }
+  s += `</g>`;
+
+  s += `<g>`;
+  for (const [cell, entry] of tiles) {
+    const [r, c] = cell.split(",").map(Number);
+    if (footprint.has(cell)) s += tileSVG(r, c, entry);
+  }
+  s += `</g>`;
+
+  s += `<g stroke="${B.outline}" stroke-width="2.4" stroke-linecap="square">${boundaryLines()}</g>`;
+  s += rulers();
+  s += `<rect id="hover-cell" x="0" y="0" width="${CELL}" height="${CELL}" fill="none" stroke="${B.ghostShape}" stroke-width="2" rx="2" visibility="hidden" pointer-events="none"/>`;
+
+  board.innerHTML = s;
+}
+
+/* ───────────────────────── stats / shopping list ───────────────────────── */
+const FRAC = ["", "¼", "½", "¾"];
+function fmtQuarters(q) {
+  const whole = Math.floor(q / 4), rem = q % 4;
+  if (whole === 0 && rem > 0) return FRAC[rem];
+  return whole + FRAC[rem];
+}
+
+function updateStats() {
+  const counts = {};            // variant -> quarter count
+  let laidQ = 0;
+  for (const [cell, entry] of tiles) {
+    if (!footprint.has(cell)) continue;
+    for (const vid of quads(entry)) {
+      if (!vid) continue;
+      counts[vid] = (counts[vid] || 0) + 1;
+      laidQ++;
+    }
+  }
+  const list = document.getElementById("shoplist");
+  const used = VARIANTS.filter(v => counts[v.id]);
+  list.innerHTML = used.length
+    ? used.map(v => {
+        const q = counts[v.id], packs = Math.ceil(q / (4 * PACK));
+        return `<div class="shop-row">
+          <span class="chip" style="background:${v.base}"></span>
+          <span class="nm">${t("variants")[v.id]}</span>
+          <span class="ct">${fmtQuarters(q)}</span>
+          <span class="pk">${t("pack")(packs)}</span>
+        </div>`;
+      }).join("")
+    : `<div class="empty-note">${t("noTiles")}</div>`;
+
+  const total = footprint.size;
+  const area = (total * 0.09).toFixed(2);
+  const pct = total ? Math.round((laidQ / (total * 4)) * 100) : 0;
+  document.getElementById("shoptotal").innerHTML = t("shopTotal")(total, area, fmtQuarters(laidQ), pct);
+  document.getElementById("dims-label").textContent = t("dims")((COLS * 0.3).toFixed(1), (ROWS * 0.3).toFixed(1), total);
+}
+
+function refresh() { render(); updateStats(); autosave(); }
+
+/* ───────────────────────── pointer interaction ───────────────────────── */
+function cellFromEvent(e) {
+  const rect = board.getBoundingClientRect();
+  const vb = board.viewBox.baseVal;
+  const x = vb.x + (e.clientX - rect.left) / rect.width * vb.width;
+  const y = vb.y + (e.clientY - rect.top) / rect.height * vb.height;
+  const c = Math.floor(x / CELL), r = Math.floor(y / CELL);
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
+  const qc = Math.floor((x - c * CELL) / Q), qr = Math.floor((y - r * CELL) / Q);
+  return { r, c, qi: Math.min(1, Math.max(0, qr)) * 2 + Math.min(1, Math.max(0, qc)) };
+}
+
+function applyAt(cell, first) {
+  if (!cell) return;
+  const key = k(cell.r, cell.c);
+  if (mode === "shape") {
+    if (first) shapeAdd = !footprint.has(key);
+    if (shapeAdd) footprint.add(key);
+    else { footprint.delete(key); tiles.delete(key); }
+  } else if (mode === "erase") {
+    if (!tiles.has(key)) return;
+    if (precision === "quarter") {
+      const arr = quads(tiles.get(key)).slice();
+      if (!arr[cell.qi]) return;
+      arr[cell.qi] = null;
+      if (arr.every(v => !v)) tiles.delete(key);
+      else tiles.set(key, arr);
+    } else {
+      tiles.delete(key);
+    }
+  } else { // paint
+    if (!footprint.has(key)) return;
+    if (precision === "quarter") {
+      const arr = quads(tiles.get(key) ?? null).slice();
+      if (arr[cell.qi] === selected) return;
+      arr[cell.qi] = selected;
+      tiles.set(key, arr.every(v => v === selected) ? selected : arr);
+    } else {
+      if (tiles.get(key) === selected) return;
+      tiles.set(key, selected);
+    }
+  }
+  refresh();
+}
+
+board.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  board.setPointerCapture(e.pointerId);
+  dragging = true;
+  pushUndo();
+  applyAt(cellFromEvent(e), true);
+});
+board.addEventListener("pointermove", e => {
+  const cell = cellFromEvent(e);
+  const hov = document.getElementById("hover-cell");
+  if (hov) {
+    if (cell) {
+      const quarterHover = precision === "quarter" && mode !== "shape";
+      const size = quarterHover ? Q : CELL;
+      hov.setAttribute("width", size);
+      hov.setAttribute("height", size);
+      hov.setAttribute("x", cell.c * CELL + (quarterHover ? (cell.qi % 2) * Q : 0));
+      hov.setAttribute("y", cell.r * CELL + (quarterHover ? (cell.qi >> 1) * Q : 0));
+      hov.setAttribute("visibility", "visible");
+    } else hov.setAttribute("visibility", "hidden");
+  }
+  if (dragging) applyAt(cell, false);
+});
+["pointerup", "pointercancel"].forEach(ev =>
+  board.addEventListener(ev, () => { dragging = false; }));
+board.addEventListener("pointerleave", () => {
+  const hov = document.getElementById("hover-cell");
+  if (hov) hov.setAttribute("visibility", "hidden");
+});
+
+/* ───────────────────────── tools / brush / palette UI ───────────────────────── */
+const toolBtns = { paint: document.getElementById("tool-paint"), erase: document.getElementById("tool-erase"), shape: document.getElementById("tool-shape") };
+function setMode(m) {
+  mode = m;
+  for (const [id, btn] of Object.entries(toolBtns)) {
+    btn.classList.toggle("active", id === m && m !== "shape");
+    btn.classList.toggle("shape-active", id === m && m === "shape");
+  }
+  document.body.classList.toggle("shape-mode", m === "shape");
+  render();
+}
+toolBtns.paint.onclick = () => setMode("paint");
+toolBtns.erase.onclick = () => setMode("erase");
+toolBtns.shape.onclick = () => setMode(mode === "shape" ? "paint" : "shape");
+
+function setPrecision(p) {
+  precision = p;
+  document.querySelectorAll("#precision-seg button").forEach(b => b.classList.toggle("on", b.dataset.prec === p));
+}
+document.querySelectorAll("#precision-seg button").forEach(b => b.onclick = () => setPrecision(b.dataset.prec));
+
+function chipSVG(v) {
+  // mini 2×2 parquet preview
+  let s = `<svg viewBox="0 0 26 26" style="display:block">`;
+  s += `<rect width="26" height="26" fill="${v.base}"/>`;
+  if (v.kind === "grass") {
+    for (let i = 0; i < 9; i++)
+      s += `<line x1="${3 + i * 2.6}" y1="${20 - (i % 3) * 4}" x2="${3.8 + i * 2.6}" y2="${15 - (i % 3) * 4}" stroke="${v.hi}" stroke-width="1" stroke-linecap="round"/>`;
+  } else {
+    // TL + BR horizontal, TR + BL vertical
+    for (let i = 0; i < 2; i++) {
+      const o = 4 + i * 6;
+      s += `<line x1="0" y1="${o}" x2="13" y2="${o}" stroke="${v.slat}" stroke-width="1.1"/>`;
+      s += `<line x1="${13 + o}" y1="0" x2="${13 + o - 13}" y2="0" stroke="none"/>`;
+      s += `<line x1="${13 + (o - 4) + 4}" y1="0" x2="${13 + (o - 4) + 4}" y2="13" stroke="${v.slat}" stroke-width="1.1"/>`;
+      s += `<line x1="${(o - 4) + 4}" y1="13" x2="${(o - 4) + 4}" y2="26" stroke="${v.slat}" stroke-width="1.1"/>`;
+      s += `<line x1="13" y1="${13 + o}" x2="26" y2="${13 + o}" stroke="${v.slat}" stroke-width="1.1"/>`;
+    }
+    s += `<line x1="13" y1="0" x2="13" y2="26" stroke="${v.slat}" stroke-width="0.8" opacity="0.7"/>`;
+    s += `<line x1="0" y1="13" x2="26" y2="13" stroke="${v.slat}" stroke-width="0.8" opacity="0.7"/>`;
+  }
+  s += `</svg>`;
+  return s;
+}
+
+function renderPalette() {
+  const el = document.getElementById("swatches");
+  el.innerHTML = VARIANTS.map(v =>
+    `<div class="swatch ${v.id === selected ? "selected" : ""}" data-v="${v.id}">
+       <span class="chip" style="background:${v.base}">${chipSVG(v)}</span>${t("variants")[v.id]}
+     </div>`).join("");
+  el.querySelectorAll(".swatch").forEach(s => s.onclick = () => {
+    const vid = s.dataset.v;
+    if (vid !== selected) { prevSelected = selected; selected = vid; }
+    if (mode === "erase" || mode === "shape") setMode("paint");
+    renderPalette();
+  });
+  const pc = document.getElementById("pattern-colors");
+  pc.innerHTML = `${t("patternPair")} A <span class="mini" style="background:${VMAP[selected].base}"></span> ${t("variants")[selected]}
+                  &nbsp;·&nbsp; B <span class="mini" style="background:${VMAP[prevSelected].base}"></span> ${t("variants")[prevSelected]}`;
+}
+
+/* ───────────────────────── presets ───────────────────────── */
+const PRESETS = [
+  { id: "checker",   fn: (r, c) => (r + c) % 2 === 0 },
+  { id: "stripes-h", fn: (r, c) => r % 2 === 0 },
+  { id: "stripes-v", fn: (r, c) => c % 2 === 0 },
+  { id: "diagonal",  fn: (r, c) => Math.floor((r + c) / 2) % 2 === 0 },
+  { id: "border",    fn: null },
+  { id: "fill",      fn: () => true },
+];
+
+function presetIcon(p) {
+  let s = `<svg viewBox="0 0 22 22"><rect width="22" height="22" fill="var(--paper-deep)"/>`;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+    let on;
+    if (p.id === "border") on = r === 0 || r === 3 || c === 0 || c === 3;
+    else on = p.fn(r, c);
+    s += `<rect x="${c * 5.5}" y="${r * 5.5}" width="5.5" height="5.5" fill="${on ? "#C75B39" : "#8C8074"}"/>`;
+  }
+  s += `</svg>`;
+  return s;
+}
+
+function applyPreset(p) {
+  pushUndo();
+  const A = selected, B = prevSelected;
+  const isEdge = cell => {
+    const [r, c] = cell.split(",").map(Number);
+    return !(footprint.has(k(r - 1, c)) && footprint.has(k(r + 1, c)) && footprint.has(k(r, c - 1)) && footprint.has(k(r, c + 1)));
+  };
+  for (const cell of footprint) {
+    const [r, c] = cell.split(",").map(Number);
+    let useA;
+    if (p.id === "border") useA = isEdge(cell);
+    else useA = p.fn(r, c);
+    tiles.set(cell, useA ? A : B);
+  }
+  if (p.id === "fill") for (const cell of footprint) tiles.set(cell, A);
+  refresh();
+  toast(t("tPattern")(t("presets")[p.id]));
+}
+
+function renderPresets() {
+  const el = document.getElementById("presets");
+  el.innerHTML = PRESETS.map(p => `<button class="preset" data-p="${p.id}">${presetIcon(p)}${t("presets")[p.id]}</button>`).join("");
+  el.querySelectorAll(".preset").forEach(b => b.onclick = () => applyPreset(PRESETS.find(p => p.id === b.dataset.p)));
+}
+
+/* ───────────────────────── designs (save / load) ───────────────────────── */
+function renderDesigns() {
+  const designs = getDesigns();
+  const names = Object.keys(designs).sort();
+  const el = document.getElementById("design-list");
+  el.innerHTML = names.length
+    ? names.map(n => `<div class="design-item">
+        <span class="name" title="${n}">${n}</span>
+        <button data-load="${n}">${t("load")}</button>
+        <button class="del" data-del="${n}">✕</button>
+      </div>`).join("")
+    : `<div class="empty-note">${t("noDesigns")}</div>`;
+  el.querySelectorAll("[data-load]").forEach(b => b.onclick = () => {
+    pushUndo();
+    deserialize(designs[b.dataset.load]);
+    refresh();
+    toast(t("tLoaded")(b.dataset.load));
+  });
+  el.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    const d = getDesigns();
+    delete d[b.dataset.del];
+    setDesigns(d);
+    renderDesigns();
+    toast(t("tDeleted")(b.dataset.del));
+  });
+}
+
+document.getElementById("save-btn").onclick = () => {
+  const input = document.getElementById("design-name");
+  const name = input.value.trim() || t("defaultDesign") + " " + new Date().toLocaleDateString();
+  const d = getDesigns();
+  d[name] = serialize();
+  setDesigns(d);
+  input.value = "";
+  renderDesigns();
+  toast(t("tSaved")(name));
+};
+
+/* ───────────────────────── language ───────────────────────── */
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.getElementById("design-name").placeholder = t("namePlaceholder");
+  document.getElementById("undo-btn").textContent = t("undo");
+  document.querySelectorAll("#lang-seg button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
+  document.querySelectorAll("#theme-seg button").forEach(b => { b.title = t("themeTitles")[b.dataset.themePref]; });
+  renderPalette();
+  renderPresets();
+  renderDesigns();
+  render();          // rulers contain translated words
+  updateStats();
+}
+document.querySelectorAll("#lang-seg button").forEach(b => b.onclick = () => {
+  lang = b.dataset.lang;
+  localStorage.setItem(LS_LANG, lang);
+  applyLang();
+});
+
+/* ───────────────────────── misc UI ───────────────────────── */
+document.getElementById("undo-btn").onclick = undo;
+document.getElementById("clear-btn").onclick = () => {
+  if (tiles.size === 0) return;
+  pushUndo();
+  tiles.clear();
+  refresh();
+  toast(t("tCleared"));
+};
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
+  else if (e.key.toLowerCase() === "p") setMode("paint");
+  else if (e.key.toLowerCase() === "e") setMode("erase");
+  else if (e.key.toLowerCase() === "s") setMode("shape");
+  else if (e.key.toLowerCase() === "q") setPrecision(precision === "quarter" ? "tile" : "quarter");
+});
+
+/* ───────────────────────── boot ───────────────────────── */
+loadAutosave();
+setPrecision("tile");
+applyTheme();
+applyLang();
+refresh();
+</script>
+</body>
+</html>
