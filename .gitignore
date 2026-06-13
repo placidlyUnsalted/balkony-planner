@@ -1,0 +1,9 @@
+# local secrets — site password lives here and in the Pages secret SITE_PASSWORD
+SITE_PASSWORD.local.txt
+.sitepw.tmp
+
+# generated deploy artifact (copied from ./index.html by deploy.sh)
+dist/index.html
+
+.wrangler/
+node_modules/
