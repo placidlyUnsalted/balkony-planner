@@ -108,7 +108,6 @@
     position: relative; z-index: 1;
     align-items: start;
   }
-  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
 
   aside { display: flex; flex-direction: column; gap: 16px; }
   .panel {
@@ -175,14 +174,23 @@
     width: 26px; height: 26px; border-radius: 5px; flex: none;
     border: 1px solid rgba(0,0,0,.25); overflow: hidden;
   }
-  .pattern-colors {
-    margin-top: 11px; font-size: 12px; color: var(--ink-soft);
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+
+  .ab-rows { margin-top: 4px; display: flex; flex-direction: column; gap: 7px; }
+  .ab-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); }
+  .ab-row .ab-lab {
+    display: inline-grid; place-items: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    font-weight: 700; font-size: 11px; flex: none;
   }
-  .pattern-colors .mini {
-    width: 15px; height: 15px; border-radius: 4px;
-    border: 1px solid rgba(0,0,0,.3); display: inline-block;
+  .ab-chip {
+    width: 19px; height: 19px; border-radius: 4px; flex: none;
+    border: 1px solid rgba(0,0,0,.3); cursor: pointer;
+    transition: transform .08s;
   }
+  .ab-chip:hover { transform: translateY(-1px); }
+  .ab-chip.sel { outline: 2px solid var(--ink); outline-offset: 1.5px; }
+  .ab-name { margin-left: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .preset {
@@ -213,6 +221,7 @@
     background: var(--accent); color: #fff;
     border: 1.5px solid var(--accent-deep); border-radius: 8px;
     cursor: pointer; transition: transform .08s;
+    white-space: nowrap;
   }
   html[data-theme="dark"] .btn:not(.ghost) { color: #211D17; }
   .btn:hover { transform: translateY(-1px); }
@@ -231,6 +240,7 @@
     border: 1px solid var(--ink); background: var(--card-strong); color: var(--ink);
   }
   .design-item button.del { border-color: var(--accent-deep); color: var(--accent-deep); }
+  .design-item button.del.confirm { background: var(--accent); color: #fff; }
   .empty-note { font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 8px; }
 
   .shoplist { display: flex; flex-direction: column; gap: 7px; font-size: 13px; }
@@ -255,11 +265,11 @@
   }
   .stage-head {
     display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap; margin-bottom: 6px;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 6px;
   }
   .stage-title { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 17px; }
   .stage-title small { font-family: 'Karla', sans-serif; font-weight: 400; color: var(--ink-soft); font-size: 12.5px; margin-left: 8px; }
-  .stage-actions { display: flex; gap: 8px; }
+  .stage-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .shape-banner {
     display: none;
     margin: 4px 0 8px;
@@ -269,7 +279,8 @@
     border-radius: 8px; padding: 8px 12px;
   }
   body.shape-mode .shape-banner { display: block; }
-  svg#board { width: 100%; height: auto; display: block; touch-action: none; cursor: crosshair; user-select: none; }
+  /* pinch-zoom stays native so quarter-precision is reachable on phones */
+  svg#board { width: 100%; height: auto; display: block; touch-action: pinch-zoom; cursor: crosshair; user-select: none; }
 
   footer {
     text-align: center; font-size: 12px; color: var(--ink-soft);
@@ -286,6 +297,47 @@
     pointer-events: none; z-index: 50;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ───── mobile bottom toolbar ───── */
+  .mobilebar {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: var(--card);
+    border-top: 1.5px solid var(--ink);
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    gap: 4px; align-items: center; justify-content: center;
+    box-shadow: 0 -3px 12px var(--shadow-col);
+  }
+  .mb-btn {
+    width: 36px; height: 36px; flex: none;
+    display: grid; place-items: center;
+    background: var(--paper-deep); color: var(--ink);
+    border: 1.5px solid var(--ink); border-radius: 9px;
+    font-family: 'Karla', sans-serif; font-weight: 700; font-size: 14px;
+    cursor: pointer;
+  }
+  .mb-btn svg { width: 20px; height: 20px; }
+  .mb-btn svg * { stroke: var(--ink); }
+  .mb-btn.active { background: var(--ink); color: var(--paper); }
+  .mb-btn.active svg * { stroke: var(--paper); }
+  .mb-btn.shape-active { background: var(--accent); border-color: var(--accent-deep); color: #fff; }
+  .mb-btn.shape-active svg * { stroke: #fff; }
+  .mb-sep { width: 1.5px; height: 30px; background: var(--line); flex: none; }
+  .mb-dot {
+    width: 23px; height: 23px; border-radius: 50%; flex: none;
+    border: 1.5px solid rgba(0,0,0,.35); cursor: pointer;
+  }
+  .mb-dot.sel { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; padding: 10px 14px 24px; }
+    main.stage { order: -1; }     /* board first — it's the whole point */
+    header { padding: 18px 16px 6px; }
+    .tagline { display: none; }   /* save vertical space on small screens */
+    .mobilebar { display: flex; }
+    body { padding-bottom: 68px; }
+    .toast { bottom: 78px; }
+  }
 
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   header, .panel, .stage { animation: rise .5s backwards; }
@@ -343,12 +395,12 @@
     <section class="panel">
       <h2><span class="step">2</span> <span data-i18n="tileHeader"></span></h2>
       <div class="swatches" id="swatches"></div>
-      <div class="pattern-colors" id="pattern-colors"></div>
     </section>
 
     <section class="panel">
       <h2><span class="step">3</span> <span data-i18n="patterns"></span></h2>
       <div class="presets" id="presets"></div>
+      <div class="ab-rows" id="ab-rows"></div>
       <p class="hint" data-i18n-html="patternsHint"></p>
     </section>
 
@@ -373,6 +425,8 @@
       <div class="stage-title"><span data-i18n="yourBalcony"></span> <small id="dims-label"></small></div>
       <div class="stage-actions">
         <button class="btn ghost" id="undo-btn"></button>
+        <button class="btn ghost" id="redo-btn"></button>
+        <button class="btn ghost" id="export-btn">PNG ⬇</button>
         <button class="btn ghost" id="clear-btn" data-i18n="clear"></button>
       </div>
     </div>
@@ -382,6 +436,7 @@
 </div>
 
 <footer data-i18n-html="footer"></footer>
+<nav class="mobilebar" id="mobilebar"></nav>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -412,8 +467,8 @@ const I18N = {
     brush: "Brush:", fullTile: "Full tile", quarter: "Quarter ¼",
     toolHint: `Click or drag to lay tiles. <b>Quarter</b> brush paints the four sections of a RUNNEN tile one by one. <b>Shape</b> edits the balcony floor to match your real L-balcony.`,
     tileHeader: "RUNNEN tile", patterns: "Patterns",
-    patternsHint: `Patterns use your <b>current</b> + <b>previous</b> tile pick (A / B above) and fill the whole balcony.`,
-    designs: "Designs", save: "Save", load: "Load",
+    patternsHint: `Patterns fill the whole balcony using colors <b>A</b> and <b>B</b> — click the chips above to change them.`,
+    designs: "Designs", save: "Save", load: "Load", confirmDel: "Sure?",
     namePlaceholder: "e.g. Grass corner v2",
     noDesigns: "No saved designs yet.",
     shopping: "Shopping list",
@@ -423,16 +478,18 @@ const I18N = {
     yourBalcony: "Your balcony",
     dims: (w, h, n) => `bounding ${w} × ${h} m — ${n} tile floor`,
     tilesWord: "tiles",
-    undo: "↶ Undo", clear: "Clear tiles",
+    undo: "↶ Undo", redo: "↷ Redo", clear: "Clear tiles",
+    exportTitle: "Download the plan as an image",
     shapeBanner: "✏️ Shape mode — click / drag cells to add or remove balcony floor. Tiles outside the floor are removed.",
-    footer: `Shortcuts: <b>P</b> paint · <b>E</b> erase · <b>S</b> shape · <b>Q</b> quarter brush · <b>Ctrl+Z</b> undo &nbsp;—&nbsp; RUNNEN sold in packs of 9 (0.81 m²)`,
-    patternPair: "Pattern pair:",
+    footer: `Shortcuts: <b>P</b> paint · <b>E</b> erase · <b>S</b> shape · <b>Q</b> quarter brush · <b>Ctrl+Z</b> undo · <b>Ctrl+Y</b> redo &nbsp;—&nbsp; RUNNEN sold in packs of 9 (0.81 m²)`,
+    abA: "A — paint color", abB: "B — second pattern color",
     defaultDesign: "Design",
     variants: { brown: "Brown stained", graybrown: "Gray-brown", darkgray: "Dark gray", lightgray: "Light gray", grass: "Artificial grass" },
     presets: { checker: "Checker", "stripes-h": "Stripes —", "stripes-v": "Stripes |", diagonal: "Diagonal", border: "Border", fill: "Fill all" },
     tPattern: n => `${n} pattern applied`,
     tSaved: n => `Saved “${n}”`, tLoaded: n => `Loaded “${n}”`, tDeleted: n => `Deleted “${n}”`,
-    tCleared: "All tiles cleared", tNoUndo: "Nothing to undo",
+    tCleared: "All tiles cleared", tNoUndo: "Nothing to undo", tNoRedo: "Nothing to redo",
+    tExported: "Image downloaded",
     themeTitles: { light: "Light", auto: "Follow system", dark: "Dark" },
   },
   pl: {
@@ -441,8 +498,8 @@ const I18N = {
     brush: "Pędzel:", fullTile: "Cała płytka", quarter: "Ćwiartka ¼",
     toolHint: `Klikaj lub przeciągaj, aby układać płytki. Pędzel <b>Ćwiartka</b> maluje pojedyncze sekcje płytki RUNNEN. <b>Kształt</b> dopasowuje podłogę do Twojego balkonu w kształcie L.`,
     tileHeader: "Płytka RUNNEN", patterns: "Wzory",
-    patternsHint: `Wzory używają <b>obecnego</b> i <b>poprzedniego</b> koloru (A / B powyżej) i wypełniają cały balkon.`,
-    designs: "Projekty", save: "Zapisz", load: "Wczytaj",
+    patternsHint: `Wzory wypełniają cały balkon kolorami <b>A</b> i <b>B</b> — kliknij kropki powyżej, aby je zmienić.`,
+    designs: "Projekty", save: "Zapisz", load: "Wczytaj", confirmDel: "Na pewno?",
     namePlaceholder: "np. Trawnik w rogu v2",
     noDesigns: "Brak zapisanych projektów.",
     shopping: "Lista zakupów",
@@ -452,16 +509,18 @@ const I18N = {
     yourBalcony: "Twój balkon",
     dims: (w, h, n) => `obrys ${w} × ${h} m — podłoga: ${n} płytek`,
     tilesWord: "płytek",
-    undo: "↶ Cofnij", clear: "Wyczyść płytki",
+    undo: "↶ Cofnij", redo: "↷ Ponów", clear: "Wyczyść płytki",
+    exportTitle: "Pobierz plan jako obraz",
     shapeBanner: "✏️ Tryb kształtu — klikaj / przeciągaj pola, aby dodać lub usunąć podłogę balkonu. Płytki poza podłogą zostaną usunięte.",
-    footer: `Skróty: <b>P</b> maluj · <b>E</b> gumka · <b>S</b> kształt · <b>Q</b> ćwiartka · <b>Ctrl+Z</b> cofnij &nbsp;—&nbsp; RUNNEN sprzedawany w opakowaniach po 9 szt. (0,81 m²)`,
-    patternPair: "Para wzoru:",
+    footer: `Skróty: <b>P</b> maluj · <b>E</b> gumka · <b>S</b> kształt · <b>Q</b> ćwiartka · <b>Ctrl+Z</b> cofnij · <b>Ctrl+Y</b> ponów &nbsp;—&nbsp; RUNNEN sprzedawany w opakowaniach po 9 szt. (0,81 m²)`,
+    abA: "A — kolor malowania", abB: "B — drugi kolor wzoru",
     defaultDesign: "Projekt",
     variants: { brown: "Brązowa bejca", graybrown: "Szarobrązowy", darkgray: "Ciemnoszary", lightgray: "Jasnoszary", grass: "Sztuczna trawa" },
     presets: { checker: "Szachownica", "stripes-h": "Pasy —", "stripes-v": "Pasy |", diagonal: "Ukośny", border: "Ramka", fill: "Wypełnij" },
     tPattern: n => `Zastosowano wzór: ${n}`,
     tSaved: n => `Zapisano „${n}”`, tLoaded: n => `Wczytano „${n}”`, tDeleted: n => `Usunięto „${n}”`,
-    tCleared: "Wyczyszczono wszystkie płytki", tNoUndo: "Nie ma czego cofnąć",
+    tCleared: "Wyczyszczono wszystkie płytki", tNoUndo: "Nie ma czego cofnąć", tNoRedo: "Nie ma czego ponowić",
+    tExported: "Pobrano obraz",
     themeTitles: { light: "Jasny", auto: "Jak w systemie", dark: "Ciemny" },
   },
 };
@@ -509,9 +568,10 @@ let footprint = defaultFootprint();
 let tiles = new Map();            // "r,c" -> variant id (whole tile) | [TL,TR,BL,BR] quarter ids (null = empty)
 let mode = "paint";               // paint | erase | shape
 let precision = "tile";           // tile | quarter
-let selected = "brown";
-let prevSelected = "graybrown";
+let selected = "brown";           // pattern color A = paint color
+let patternB = "graybrown";       // pattern color B (explicit, set in Patterns panel)
 let undoStack = [];
+let redoStack = [];
 let dragging = false;
 let shapeAdd = true;
 
@@ -532,15 +592,24 @@ function loadAutosave() {
 function getDesigns() { try { return JSON.parse(localStorage.getItem(LS_DESIGNS)) || {}; } catch (e) { return {}; } }
 function setDesigns(d) { try { localStorage.setItem(LS_DESIGNS, JSON.stringify(d)); } catch (e) {} }
 
-/* ───────────────────────── undo ───────────────────────── */
+/* ───────────────────────── undo / redo ───────────────────────── */
 function pushUndo() {
   undoStack.push(JSON.stringify(serialize()));
-  if (undoStack.length > 60) undoStack.shift();
+  if (undoStack.length > 80) undoStack.shift();
+  redoStack.length = 0;
 }
 function undo() {
   const prev = undoStack.pop();
   if (!prev) { toast(t("tNoUndo")); return; }
+  redoStack.push(JSON.stringify(serialize()));
   deserialize(JSON.parse(prev));
+  refresh();
+}
+function redo() {
+  const next = redoStack.pop();
+  if (!next) { toast(t("tNoRedo")); return; }
+  undoStack.push(JSON.stringify(serialize()));
+  deserialize(JSON.parse(next));
   refresh();
 }
 
@@ -598,7 +667,7 @@ function quadSVG(r, c, qi, vid) {
 function tileSVG(r, c, entry) {
   const arr = quads(entry);
   const x = c * CELL, y = r * CELL;
-  let s = `<g>`;
+  let s = `<g id="tg-${r}-${c}">`;
   for (let qi = 0; qi < 4; qi++) if (arr[qi]) s += quadSVG(r, c, qi, arr[qi]);
   s += `<rect x="${x + 0.5}" y="${y + 0.5}" width="${CELL - 1}" height="${CELL - 1}" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1"/>`;
   s += `</g>`;
@@ -673,7 +742,7 @@ function render() {
   }
   s += `</g>`;
 
-  s += `<g>`;
+  s += `<g id="tilelayer">`;
   for (const [cell, entry] of tiles) {
     const [r, c] = cell.split(",").map(Number);
     if (footprint.has(cell)) s += tileSVG(r, c, entry);
@@ -685,6 +754,18 @@ function render() {
   s += `<rect id="hover-cell" x="0" y="0" width="${CELL}" height="${CELL}" fill="none" stroke="${B.ghostShape}" stroke-width="2" rx="2" visibility="hidden" pointer-events="none"/>`;
 
   board.innerHTML = s;
+}
+
+// fast path while painting: swap only the changed tile's <g>, no full board rebuild
+function patchTile(r, c) {
+  const layer = document.getElementById("tilelayer");
+  if (!layer) { render(); return; }
+  const key = k(r, c);
+  const node = document.getElementById(`tg-${r}-${c}`);
+  if (node) node.remove();
+  if (tiles.has(key) && footprint.has(key)) {
+    layer.insertAdjacentHTML("beforeend", tileSVG(r, c, tiles.get(key)));
+  }
 }
 
 /* ───────────────────────── stats / shopping list ───────────────────────── */
@@ -748,7 +829,10 @@ function applyAt(cell, first) {
     if (first) shapeAdd = !footprint.has(key);
     if (shapeAdd) footprint.add(key);
     else { footprint.delete(key); tiles.delete(key); }
-  } else if (mode === "erase") {
+    refresh();
+    return;
+  }
+  if (mode === "erase") {
     if (!tiles.has(key)) return;
     if (precision === "quarter") {
       const arr = quads(tiles.get(key)).slice();
@@ -771,7 +855,9 @@ function applyAt(cell, first) {
       tiles.set(key, selected);
     }
   }
-  refresh();
+  patchTile(cell.r, cell.c);   // fast: only the touched tile re-renders
+  updateStats();
+  autosave();
 }
 
 board.addEventListener("pointerdown", e => {
@@ -804,7 +890,7 @@ board.addEventListener("pointerleave", () => {
   if (hov) hov.setAttribute("visibility", "hidden");
 });
 
-/* ───────────────────────── tools / brush / palette UI ───────────────────────── */
+/* ───────────────────────── tools / brush UI ───────────────────────── */
 const toolBtns = { paint: document.getElementById("tool-paint"), erase: document.getElementById("tool-erase"), shape: document.getElementById("tool-shape") };
 function setMode(m) {
   mode = m;
@@ -813,6 +899,7 @@ function setMode(m) {
     btn.classList.toggle("shape-active", id === m && m === "shape");
   }
   document.body.classList.toggle("shape-mode", m === "shape");
+  updateMobilebar();
   render();
 }
 toolBtns.paint.onclick = () => setMode("paint");
@@ -822,9 +909,11 @@ toolBtns.shape.onclick = () => setMode(mode === "shape" ? "paint" : "shape");
 function setPrecision(p) {
   precision = p;
   document.querySelectorAll("#precision-seg button").forEach(b => b.classList.toggle("on", b.dataset.prec === p));
+  updateMobilebar();
 }
 document.querySelectorAll("#precision-seg button").forEach(b => b.onclick = () => setPrecision(b.dataset.prec));
 
+/* ───────────────────────── palette ───────────────────────── */
 function chipSVG(v) {
   // mini 2×2 parquet preview
   let s = `<svg viewBox="0 0 26 26" style="display:block">`;
@@ -833,13 +922,11 @@ function chipSVG(v) {
     for (let i = 0; i < 9; i++)
       s += `<line x1="${3 + i * 2.6}" y1="${20 - (i % 3) * 4}" x2="${3.8 + i * 2.6}" y2="${15 - (i % 3) * 4}" stroke="${v.hi}" stroke-width="1" stroke-linecap="round"/>`;
   } else {
-    // TL + BR horizontal, TR + BL vertical
     for (let i = 0; i < 2; i++) {
       const o = 4 + i * 6;
       s += `<line x1="0" y1="${o}" x2="13" y2="${o}" stroke="${v.slat}" stroke-width="1.1"/>`;
-      s += `<line x1="${13 + o}" y1="0" x2="${13 + o - 13}" y2="0" stroke="none"/>`;
-      s += `<line x1="${13 + (o - 4) + 4}" y1="0" x2="${13 + (o - 4) + 4}" y2="13" stroke="${v.slat}" stroke-width="1.1"/>`;
-      s += `<line x1="${(o - 4) + 4}" y1="13" x2="${(o - 4) + 4}" y2="26" stroke="${v.slat}" stroke-width="1.1"/>`;
+      s += `<line x1="${13 + o}" y1="0" x2="${13 + o}" y2="13" stroke="${v.slat}" stroke-width="1.1"/>`;
+      s += `<line x1="${o}" y1="13" x2="${o}" y2="26" stroke="${v.slat}" stroke-width="1.1"/>`;
       s += `<line x1="13" y1="${13 + o}" x2="26" y2="${13 + o}" stroke="${v.slat}" stroke-width="1.1"/>`;
     }
     s += `<line x1="13" y1="0" x2="13" y2="26" stroke="${v.slat}" stroke-width="0.8" opacity="0.7"/>`;
@@ -849,21 +936,39 @@ function chipSVG(v) {
   return s;
 }
 
+function selectColor(vid) {
+  selected = vid;
+  if (mode === "erase" || mode === "shape") setMode("paint");
+  renderPalette();
+}
+
 function renderPalette() {
   const el = document.getElementById("swatches");
   el.innerHTML = VARIANTS.map(v =>
-    `<div class="swatch ${v.id === selected ? "selected" : ""}" data-v="${v.id}">
+    `<div class="swatch ${v.id === selected ? "selected" : ""}" data-v="${v.id}" role="button" tabindex="0">
        <span class="chip" style="background:${v.base}">${chipSVG(v)}</span>${t("variants")[v.id]}
      </div>`).join("");
-  el.querySelectorAll(".swatch").forEach(s => s.onclick = () => {
-    const vid = s.dataset.v;
-    if (vid !== selected) { prevSelected = selected; selected = vid; }
-    if (mode === "erase" || mode === "shape") setMode("paint");
-    renderPalette();
+  el.querySelectorAll(".swatch").forEach(s => {
+    s.onclick = () => selectColor(s.dataset.v);
+    s.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectColor(s.dataset.v); } };
   });
-  const pc = document.getElementById("pattern-colors");
-  pc.innerHTML = `${t("patternPair")} A <span class="mini" style="background:${VMAP[selected].base}"></span> ${t("variants")[selected]}
-                  &nbsp;·&nbsp; B <span class="mini" style="background:${VMAP[prevSelected].base}"></span> ${t("variants")[prevSelected]}`;
+  renderAB();
+  updateMobilebar();
+}
+
+/* ───────────────────────── pattern colors A / B ───────────────────────── */
+function renderAB() {
+  const el = document.getElementById("ab-rows");
+  const row = (label, current, title, onPick) => {
+    const chips = VARIANTS.map(v =>
+      `<span class="ab-chip ${v.id === current ? "sel" : ""}" data-v="${v.id}" style="background:${v.base}" title="${t("variants")[v.id]}"></span>`).join("");
+    return { html: `<div class="ab-row" data-row="${label}" title="${title}"><span class="ab-lab">${label}</span>${chips}<span class="ab-name">${t("variants")[current]}</span></div>`, onPick };
+  };
+  const a = row("A", selected, t("abA"));
+  const b = row("B", patternB, t("abB"));
+  el.innerHTML = a.html + b.html;
+  el.querySelector('[data-row="A"]').querySelectorAll(".ab-chip").forEach(ch => ch.onclick = () => selectColor(ch.dataset.v));
+  el.querySelector('[data-row="B"]').querySelectorAll(".ab-chip").forEach(ch => ch.onclick = () => { patternB = ch.dataset.v; renderAB(); });
 }
 
 /* ───────────────────────── presets ───────────────────────── */
@@ -890,7 +995,7 @@ function presetIcon(p) {
 
 function applyPreset(p) {
   pushUndo();
-  const A = selected, B = prevSelected;
+  const A = selected, B = patternB;
   const isEdge = cell => {
     const [r, c] = cell.split(",").map(Number);
     return !(footprint.has(k(r - 1, c)) && footprint.has(k(r + 1, c)) && footprint.has(k(r, c - 1)) && footprint.has(k(r, c + 1)));
@@ -932,6 +1037,15 @@ function renderDesigns() {
     toast(t("tLoaded")(b.dataset.load));
   });
   el.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    if (!b.classList.contains("confirm")) {
+      // two-step delete: first tap arms, second tap (within 2.5 s) deletes
+      b.classList.add("confirm");
+      b.textContent = t("confirmDel");
+      setTimeout(() => {
+        if (b.isConnected) { b.classList.remove("confirm"); b.textContent = "✕"; }
+      }, 2500);
+      return;
+    }
     const d = getDesigns();
     delete d[b.dataset.del];
     setDesigns(d);
@@ -951,6 +1065,73 @@ document.getElementById("save-btn").onclick = () => {
   toast(t("tSaved")(name));
 };
 
+/* ───────────────────────── PNG export ───────────────────────── */
+document.getElementById("export-btn").onclick = () => {
+  const clone = board.cloneNode(true);
+  clone.querySelector("#hover-cell")?.remove();
+  const vb = board.viewBox.baseVal;
+  const scale = 3;
+  clone.setAttribute("width", vb.width);
+  clone.setAttribute("height", vb.height);
+  const svgText = new XMLSerializer().serializeToString(clone);
+  const url = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml;charset=utf-8" }));
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = vb.width * scale;
+    canvas.height = vb.height * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = getComputedStyle(document.querySelector(".stage")).backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "balkon-runnen-plan.png";
+    a.click();
+    toast(t("tExported"));
+  };
+  img.onerror = () => URL.revokeObjectURL(url);
+  img.src = url;
+};
+
+/* ───────────────────────── mobile bottom toolbar ───────────────────────── */
+const TOOL_ICONS = {
+  paint: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 14l9-9 5 5-9 9H5a1 1 0 0 1-1-1v-4z" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 5l5 5" stroke-width="1.8"/></svg>`,
+  erase: `<svg viewBox="0 0 24 24" fill="none"><path d="M7 16l8-8 4 4-6 6H9l-2-2z" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 20h16" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  shape: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 4h10v8h6v8H4V4z" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="3 2.5"/></svg>`,
+};
+
+function buildMobilebar() {
+  const bar = document.getElementById("mobilebar");
+  bar.innerHTML = `
+    <button class="mb-btn" data-mb-tool="paint" title="${t("paint")}">${TOOL_ICONS.paint}</button>
+    <button class="mb-btn" data-mb-tool="erase" title="${t("erase")}">${TOOL_ICONS.erase}</button>
+    <button class="mb-btn" data-mb-tool="shape" title="${t("shape")}">${TOOL_ICONS.shape}</button>
+    <button class="mb-btn" id="mb-quarter" title="${t("quarter")}">¼</button>
+    <span class="mb-sep"></span>
+    ${VARIANTS.map(v => `<span class="mb-dot" data-mb-color="${v.id}" style="background:${v.base}" title="${t("variants")[v.id]}"></span>`).join("")}
+    <span class="mb-sep"></span>
+    <button class="mb-btn" id="mb-undo" title="${t("undo")}">↶</button>`;
+  bar.querySelectorAll("[data-mb-tool]").forEach(b => b.onclick = () =>
+    setMode(b.dataset.mbTool === "shape" && mode === "shape" ? "paint" : b.dataset.mbTool));
+  bar.querySelector("#mb-quarter").onclick = () => setPrecision(precision === "quarter" ? "tile" : "quarter");
+  bar.querySelectorAll("[data-mb-color]").forEach(d => d.onclick = () => selectColor(d.dataset.mbColor));
+  bar.querySelector("#mb-undo").onclick = undo;
+  updateMobilebar();
+}
+
+function updateMobilebar() {
+  const bar = document.getElementById("mobilebar");
+  if (!bar.firstChild) return;
+  bar.querySelectorAll("[data-mb-tool]").forEach(b => {
+    b.classList.toggle("active", b.dataset.mbTool === mode && mode !== "shape");
+    b.classList.toggle("shape-active", b.dataset.mbTool === mode && mode === "shape");
+  });
+  bar.querySelector("#mb-quarter").classList.toggle("active", precision === "quarter");
+  bar.querySelectorAll("[data-mb-color]").forEach(d => d.classList.toggle("sel", d.dataset.mbColor === selected));
+}
+
 /* ───────────────────────── language ───────────────────────── */
 function applyLang() {
   document.documentElement.lang = lang;
@@ -958,11 +1139,14 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.getElementById("design-name").placeholder = t("namePlaceholder");
   document.getElementById("undo-btn").textContent = t("undo");
+  document.getElementById("redo-btn").textContent = t("redo");
+  document.getElementById("export-btn").title = t("exportTitle");
   document.querySelectorAll("#lang-seg button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
   document.querySelectorAll("#theme-seg button").forEach(b => { b.title = t("themeTitles")[b.dataset.themePref]; });
   renderPalette();
   renderPresets();
   renderDesigns();
+  buildMobilebar();
   render();          // rulers contain translated words
   updateStats();
 }
@@ -974,6 +1158,7 @@ document.querySelectorAll("#lang-seg button").forEach(b => b.onclick = () => {
 
 /* ───────────────────────── misc UI ───────────────────────── */
 document.getElementById("undo-btn").onclick = undo;
+document.getElementById("redo-btn").onclick = redo;
 document.getElementById("clear-btn").onclick = () => {
   if (tiles.size === 0) return;
   pushUndo();
@@ -993,11 +1178,14 @@ function toast(msg) {
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT") return;
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
-  else if (e.key.toLowerCase() === "p") setMode("paint");
-  else if (e.key.toLowerCase() === "e") setMode("erase");
-  else if (e.key.toLowerCase() === "s") setMode("shape");
-  else if (e.key.toLowerCase() === "q") setPrecision(precision === "quarter" ? "tile" : "quarter");
+  const key = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
+  else if ((e.ctrlKey || e.metaKey) && key === "z") { e.preventDefault(); undo(); }
+  else if ((e.ctrlKey || e.metaKey) && key === "y") { e.preventDefault(); redo(); }
+  else if (key === "p") setMode("paint");
+  else if (key === "e") setMode("erase");
+  else if (key === "s") setMode("shape");
+  else if (key === "q") setPrecision(precision === "quarter" ? "tile" : "quarter");
 });
 
 /* ───────────────────────── boot ───────────────────────── */
